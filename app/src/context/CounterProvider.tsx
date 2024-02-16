@@ -2,7 +2,7 @@
 
 import { SystemProgram } from "@solana/web3.js";
 import { confirmTx, getCounterPDA, getProgram } from "@/lib/utils";
-import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { AnchorWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 type CounterContextProps = {
@@ -22,13 +22,12 @@ const CounterProvider = ({ children }: { children: React.ReactNode }) => {
   const [count, setCount] = useState<number>(0);
 
   const program = useMemo(() => {
-    if (!connection || !wallet) return;
-    return getProgram(connection, wallet);
+    if (!connection) return;
+    return getProgram(connection, wallet ?? {} as AnchorWallet);
   }, [connection, wallet]);
-  console.log('program: ', program);
 
   const getCount = useCallback(async () => {
-    if (!program || !wallet) return 0;
+    if (!program) return 0;
     try {
       const count = await program.account.counter.fetch(getCounterPDA());
       setCount(Number(count?.count) || 0);
